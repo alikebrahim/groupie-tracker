@@ -8,8 +8,8 @@ type ArtistComplete struct {
 	CreationDate int       `json:"creationDate"`
 	FirstAlbum   string    `json:"firstAlbum"`
 	Locations    Locations `json:"locations"`
-	ConcertDates Dates     `json:"concertDates"`
-	Relations    string    `json:"relations"`
+	ConcertDates Dates     `json:"dates"`
+	Relations    Relations `json:"relations"`
 }
 type Artist struct {
 	ID           int      `json:"id"`
@@ -32,6 +32,6 @@ type Dates struct {
 	Dates []string `json:"dates"`
 }
 type Relations struct {
-	ID             int      `json:"id"`
-	DatesLocations []string `json:"datesLocations"`
+	ID             int                 `json:"id"`
+	DatesLocations map[string][]string `json:"datesLocations"`
 }

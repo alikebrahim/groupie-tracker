@@ -46,8 +46,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 			FirstAlbum:   item.FirstAlbum,
 			Locations:    locationsAPI(item.Locations),
 			ConcertDates: datesAPI(item.ConcertDates),
-			//Relations:    relationsAPI(item.Relations),
-			Relations: item.Relations,
+			Relations:    relationsAPI(item.Relations),
+			// Relations: item.Relations,
 		}
 		artistsComplete = append(artistsComplete, artist)
 
