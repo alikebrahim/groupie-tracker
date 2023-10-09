@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 )
 
 const (
@@ -15,7 +16,8 @@ const (
 	RelationsAPI = "https://groupietrackers.herokuapp.com/api/relation"
 )
 
-func artistAPI(w http.ResponseWriter) {
+func artistAPI(w http.ResponseWriter, wg *sync.WaitGroup) {
+	defer wg.Done()
 	res, err := http.Get(ArtistAPI)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "http.Get", "Error getting api:", err)
@@ -40,7 +42,8 @@ func artistAPI(w http.ResponseWriter) {
 	}
 }
 
-func locationsAPI(w http.ResponseWriter) {
+func locationsAPI(w http.ResponseWriter, wg *sync.WaitGroup) {
+	defer wg.Done()
 	res, err := http.Get(LocationsAPI)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "http.Get", "Error getting api:", err)
@@ -65,7 +68,8 @@ func locationsAPI(w http.ResponseWriter) {
 	}
 }
 
-func datesAPI(w http.ResponseWriter) {
+func datesAPI(w http.ResponseWriter, wg *sync.WaitGroup) {
+	defer wg.Done()
 	res, err := http.Get(DatesAPI)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "http.Get", "Error getting api:", err)
@@ -90,7 +94,8 @@ func datesAPI(w http.ResponseWriter) {
 	}
 }
 
-func relationsAPI(w http.ResponseWriter) {
+func relationsAPI(w http.ResponseWriter, wg *sync.WaitGroup) {
+	defer wg.Done()
 	res, err := http.Get(RelationsAPI)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "http.Get", "Error getting api:", err)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -21,11 +22,17 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	artistAPI(w)
-	datesAPI(w)
-	locationsAPI(w)
-	relationsAPI(w)
-	jsonMarshal, err := json.Marshal(relations)
+	wg := &sync.WaitGroup{}
+
+	wg.Add(4)
+	go artistAPI(w, wg)
+	go datesAPI(w, wg)
+	go locationsAPI(w, wg)
+	go relationsAPI(w, wg)
+
+	wg.Wait()
+
+	jsonMarshal, err := json.Marshal(artists)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "error marshalling json", err)
 		if err != nil {
@@ -40,8 +47,4 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		)
 	}
 	fmt.Println(time.Since(start))
-	for _, artist := range artists[0].Members {
-
-		fmt.Println(artist)
-	}
 }
