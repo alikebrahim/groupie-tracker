@@ -1,16 +1,5 @@
 package main
 
-type ArtistComplete struct {
-	ID           int       `json:"id"`
-	Image        string    `json:"image"`
-	Name         string    `json:"name"`
-	Members      []string  `json:"members"`
-	CreationDate int       `json:"creationDate"`
-	FirstAlbum   string    `json:"firstAlbum"`
-	Locations    Locations `json:"locations"`
-	ConcertDates Dates     `json:"dates"`
-	Relations    Relations `json:"relations"`
-}
 type Artist struct {
 	ID           int      `json:"id"`
 	Image        string   `json:"image"`
@@ -23,15 +12,24 @@ type Artist struct {
 	Relations    string   `json:"relations"`
 }
 type Locations struct {
+	Index []LocationsIndex `json:"index"`
+}
+type Dates struct {
+	Index []DatesIndex `json:"index"`
+}
+type Relations struct {
+	Index []RelationsIndex `json:"index"`
+}
+type LocationsIndex struct {
 	ID        int      `json:"id"`
 	Locations []string `json:"locations"`
 	Dates     string   `json:"dates"`
 }
-type Dates struct {
+type DatesIndex struct {
 	ID    int      `json:"id"`
 	Dates []string `json:"dates"`
 }
-type Relations struct {
+type RelationsIndex struct {
 	ID             int                 `json:"id"`
 	DatesLocations map[string][]string `json:"datesLocations"`
 }

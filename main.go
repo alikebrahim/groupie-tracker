@@ -3,56 +3,29 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 var artists []Artist
-var artistsComplete []ArtistComplete
+var locations Locations
+var dates Dates
+var relations Relations
 
 func main() {
 	http.HandleFunc("/", indexHandler)
+	fmt.Println("Server starting at port 3000")
 	http.ListenAndServe(":3000", nil)
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	artistAPI := "https://groupietrackers.herokuapp.com/api/artists"
-	res, err := http.Get(artistAPI)
-	if err != nil {
-		fmt.Fprintln(w, "http.Get", "Error getting api:", err)
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Fprintln(w, "http.Get", "Error body reading api:", err)
-	}
-	//fmt.Fprintln(w, string(body))
-	err = json.Unmarshal(body, &artists)
-	if err != nil {
-		fmt.Fprintln(w, "error ummarshalling JSON", err)
-	}
-	//fmt.Fprintln(w, artists)
-	//for _, item := range artists {
-	//	fmt.Fprintln(w, item)
-	//}
-	for _, item := range artists {
-		artist := ArtistComplete{
-			ID:           item.ID,
-			Image:        item.Image,
-			Name:         item.Name,
-			Members:      item.Members,
-			CreationDate: item.CreationDate,
-			FirstAlbum:   item.FirstAlbum,
-			Locations:    locationsAPI(item.Locations),
-			ConcertDates: datesAPI(item.ConcertDates),
-			Relations:    relationsAPI(item.Relations),
-			// Relations: item.Relations,
-		}
-		artistsComplete = append(artistsComplete, artist)
-
-	}
-	jsonMarshal, err := json.Marshal(artistsComplete)
+	start := time.Now()
+	artistAPI(w)
+	datesAPI(w)
+	locationsAPI(w)
+	relationsAPI(w)
+	jsonMarshal, err := json.Marshal(relations)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "error marshalling json", err)
 		if err != nil {
@@ -66,62 +39,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 			err2,
 		)
 	}
-}
+	fmt.Println(time.Since(start))
+	for _, artist := range artists[0].Members {
 
-func locationsAPI(loc string) Locations {
-	locations := Locations{}
-	API := loc
-	res, err := http.Get(API)
-	if err != nil {
-		fmt.Println("error", err)
+		fmt.Println(artist)
 	}
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println("error", err)
-	}
-	err = json.Unmarshal(body, &locations)
-	if err != nil {
-		fmt.Println("error unmarshalling to locations", err)
-	}
-
-	return locations
-}
-
-func datesAPI(dat string) Dates {
-	dates := Dates{}
-	API := dat
-	res, err := http.Get(API)
-	if err != nil {
-		fmt.Println("error", err)
-	}
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println("error", err)
-	}
-	err = json.Unmarshal(body, &dates)
-	if err != nil {
-		fmt.Println("error unmarshalling to dates", err)
-	}
-
-	return dates
-}
-
-func relationsAPI(rel string) Relations {
-	relations := Relations{}
-	API := rel
-	res, err := http.Get(API)
-	if err != nil {
-		fmt.Println("error", err)
-	}
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println("error", err)
-	}
-	err = json.Unmarshal(body, &relations)
-	if err != nil {
-		fmt.Println("error unmarshalling to relations", err)
-	}
-
-	return relations
-
 }
