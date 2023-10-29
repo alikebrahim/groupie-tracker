@@ -1,0 +1,17 @@
+        .page-title {
+            text-align: center;
+        }
+        .artist-card {
+            width: 200px;
+            height: 200px;
+            /* border: 1px solid #000; */
+            text-align: center;
+            margin: 10px;
+            float: left;
+        }
+
+        .artist-image {
+            max-width: 100px;
+            max-height: 100px;
+            padding: 2px;
+        }

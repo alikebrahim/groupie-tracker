@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1 class="page-title">Groupie Tracker</h1>
+    <div id="artist-grid">
+        {{range .}}
+        <div class="artist-card">
+            <img src="{{.Image}}" alt="Artist" class="artist-image">
+            <div class="container">
+                <h4><b>{{.Name}}</b></h4>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</body>
+
+</html>
