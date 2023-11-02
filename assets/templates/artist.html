@@ -14,8 +14,12 @@
         {{end}}
     
         <br>
-        {{ range .DatesLocations}}
-        <br>{{.}}
+        {{ range $location, $dates := .DatesLocations}}
+        <br>{{ FormatText $location}} 
+        <br>{{range $date := $dates}} 
+        <br>{{ $date }} 
+        {{end}}
+        <br>
         {{end}}
     </body>
 </html>

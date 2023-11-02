@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
 
 var artists []Artist
-var locations Locations
-var dates Dates
+
+// var locations Locations
+// var dates Dates
 var relations Relations
 
 func main() {
@@ -27,10 +26,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	wg := &sync.WaitGroup{}
 
-	wg.Add(4)
+	wg.Add(2)
 	go artistAPI(w, wg)
-	go datesAPI(w, wg)
-	go locationsAPI(w, wg)
+	// go datesAPI(w, wg)
+	// go locationsAPI(w, wg)
 	go relationsAPI(w, wg)
 
 	wg.Wait()
@@ -56,19 +55,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(time.Since(start))
 }
 
-type art struct {
-	ID             int                 `json:"id"`
-	Image          string              `json:"image"`
-	Name           string              `json:"name"`
-	Members        []string            `json:"members"`
-	CreationDate   int                 `json:"creationDate"`
-	FirstAlbum     string              `json:"firstAlbum"`
-	DatesLocations map[string][]string `json:"datesLocations"`
-}
-
 func artistHandler(w http.ResponseWriter, r *http.Request) {
-	id := getID(r) - 1
-	art := art{
+	id := GetID(r) - 1
+	artist := ArtistRender{
 		ID:             artists[id].ID,
 		Image:          artists[id].Image,
 		Name:           artists[id].Name,
@@ -77,20 +66,13 @@ func artistHandler(w http.ResponseWriter, r *http.Request) {
 		FirstAlbum:     artists[id].FirstAlbum,
 		DatesLocations: relations.Index[id].DatesLocations,
 	}
-	tmpl := template.Must(template.ParseFiles("assets/templates/artist.html"))
-	if err := tmpl.Execute(w, art); err != nil {
+
+	tmpl := template.Must(template.New("artist.html").Funcs(template.FuncMap{
+		"FormatText": FormatText,
+	}).ParseFiles("assets/templates/artist.html"))
+	// tmpl := template.Must(template.ParseFiles("assets/templates/artist.html"))
+	if err := tmpl.Execute(w, artist); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-}
-
-func getID(r *http.Request) int {
-	path := r.URL.Path
-	parts := strings.Split(path, "/")
-	idStr := parts[len(parts)-1]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return 0
-	}
-	return id
 }
