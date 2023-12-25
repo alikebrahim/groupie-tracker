@@ -7,14 +7,50 @@
 
 <body>
     <h1 class="page-title">Groupie Tracker</h1>
+    <div id="filters">
+        <form action="/" method="post">
+            <label for="InputRange">Creation Date from: </label>
+            <input type="range" min="1957" max="2015" value=1957 oninput="this.nextElementSibling.value=this.value"
+                name="yearRangeFrom">
+            <output>1957</output>
+            <label for="InputRange">Creation Date to: </label>
+            <input type="range" min="1957" max="2015" value=2015 oninput="this.nextElementSibling.value=this.value"
+                name="yearRangeTo">
+            <output>1957</output>
+            <label for="InputRange">First Album Date from: </label>
+            <input type="range" min="1962" max="2018" value=1957 oninput="this.nextElementSibling.value=this.value"
+                name="firstAlbumFrom">
+            <output>1962</output>
+            <label for="InputRange">First Album Date to: </label>
+            <input type="range" min="1962" max="2018" value=2018 oninput="this.nextElementSibling.value=this.value"
+                name="firstAlbumTo">
+            <output>1962</output>
+            <!-- <label for="ConcertDate">Concert Date from:</label> -->
+            <!-- <input type="date" name="concertDateFrom"> -->
+            <!-- <label for="ConcertDate">Concert Date to:</label> -->
+            <!-- <input type="date" name="concertDateTo"> -->
+            <label for="Location">Location</label>
+            <input type="text" name="location" value="">
+            <label for="MembersNum">Num. of Members: </label>
+            <input type="checkbox" name="membersNum[]" value="1"> 1
+            <input type="checkbox" name="membersNum[]" value="2"> 2
+            <input type="checkbox" name="membersNum[]" value="3"> 3
+            <input type="checkbox" name="membersNum[]" value="4"> 4
+            <input type="checkbox" name="membersNum[]" value="5"> 5
+            <input type="checkbox" name="membersNum[]" value="6"> 6
+            <input type="checkbox" name="membersNum[]" value="7"> 7
+            <input type="checkbox" name="membersNum[]" value="8"> 8
+            <input type="submit" name="submit" value="Filter">
+        </form>
+    </div>
     <div id="artist-grid">
         {{range .}}
         <div class="artist-card">
-            <a href="/artist/{{.ID}}">
-            <img src="{{.Image}}" alt="Artist" class="artist-image">
+            <a href="/artist/?id={{.ID}}">
+                <img src="{{.Image}}" alt="Artist" class="artist-image">
             </a>
             <div class="container">
-                <h4><b>{{.Name}}</b></h4>
+                <h5><b>{{.Name}}</b></h4>
             </div>
         </div>
         {{end}}
