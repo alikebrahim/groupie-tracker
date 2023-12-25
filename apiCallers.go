@@ -33,7 +33,7 @@ func artistAPI(w http.ResponseWriter, wg *sync.WaitGroup) {
 			log.Fatal("error writing response") // 500 error
 		}
 	}
-	err = json.Unmarshal(body, &artists)
+	err = json.Unmarshal(body, &Artists)
 	if err != nil {
 		_, err := fmt.Fprintln(w, "error ummarshalling JSON", err)
 		if err != nil {
