@@ -17,11 +17,13 @@ import (
 // Note 2: Ensure http status errors handling                             //
 // **********************************************************************//
 
-var Artists []Artist
+var (
+	Artists   []Artist
+	relations Relations
 
-// var locations Locations
-// var dates Dates
-var relations Relations
+// locations Locations
+// dates Dates
+)
 
 func main() {
 	http.HandleFunc("/", indexRouter)
@@ -214,16 +216,6 @@ func artistHandler(w http.ResponseWriter, r *http.Request) {
 	artist.MapDetails.Locations = Geocoding(artist)
 
 	artist.MapDetails.MapURL = CreatMap(artist)
-	// fmt.Println("From artistHanderl (fullUrl)\n", artist.MapDetails.mapURL)
-	// for _, loc := range artist.MapDetails.Locations {
-	// 	fmt.Println(loc.Location + ":")
-	// 	fmt.Printf("Lat: (%v) Lng: (%v)\n", loc.Lat, loc.Lng)
-	// }
-
-	// Geo := GeoLocation{}
-	// _, Geo.Lat, Geo.Lng = Geocoding(artist)
-	// artist.Location = append(artist.Location, Geo)
-	// fmt.Printf("Latitude: (%f) Longtitude: (%f)\n", artist.Location[0].Lat, artist.Location[0].Lng)
 
 	tmpl := template.Must(template.New("artist.html").Funcs(template.FuncMap{
 		"FormatText": FormatText,
