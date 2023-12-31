@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title></title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-         <!-- <link href="css/style.css" rel="stylesheet">  -->
-    </head>
-    <body>
-        <h1>{{.Name}}</h1>
-        <img src="{{.Image}}" alt="avatar">
-        {{ range .Members }}
-        <br>{{.}}
-        {{end}}
-    
-        <br>
-        {{ range $location, $dates := .DatesLocations}}
-        <br>{{ FormatText $location}} 
-        <br>{{range $date := $dates}} 
-        <br>{{ $date }} 
-        {{end}}
-        <br>
-        {{end}}
-    </body>
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link href="css/style.css" rel="stylesheet">  -->
+</head>
+
+<body>
+    <h1>{{.Name}}</h1>
+    <img src="{{.Image}}" alt="avatar">
+    {{ range .Members }}
+    <br>{{.}}
+    {{end}}
+    <br>
+    {{ range $location, $dates := .DatesLocations}}
+    <br>{{ FormatText $location}}
+    <br>{{range $date := $dates}}
+    <br>{{ $date }}
+    {{end}}
+    <br>
+    {{end}}
+    <img src="{{.MapDetails.MapURL }}" alt="map">
+</body>
+
 </html>
