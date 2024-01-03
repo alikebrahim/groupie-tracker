@@ -172,3 +172,27 @@ func FilterParamsCheck(Artists []Artist) {
 	fmt.Printf("max members: %d <<>> earliest album year: %d <<>> latest album year: %d <<>> earliest creation date: %d <<>> latest creation date: %d \n", maxMem, earliestAlbum, latestAlbum, earliestCreation, latestCreation)
 
 }
+
+func containsMember(members []string, query string) bool {
+	for _, m := range members {
+		if strings.Contains(strings.ToLower(m), strings.ToLower(query)) {
+			return true
+		}
+	}
+	return false
+}
+
+func checkFilteredArtists(arr []Artist, artist Artist) bool {
+	if len(arr) == 0 {
+		return false
+	}
+	id := artist.ID
+	for i := 0; i < len(arr); i++{
+		if arr[i].ID == id {
+			return true
+		}
+	
+	}
+	return false
+
+}

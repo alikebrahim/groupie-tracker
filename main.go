@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"strconv"
 )
 
 // *************************************************************************//
@@ -27,12 +28,58 @@ var (
 
 func main() {
 	http.HandleFunc("/", indexRouter)
+	http.HandleFunc("/search", searchHandler)
 	http.HandleFunc("/artist/", artistHandler)
 	http.HandleFunc("/filter-artist/", filterHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./assets"))))
 	fmt.Println("Server starting at port 3000")
 	http.ListenAndServe(":3000", nil)
 }
+
+
+func searchHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	var filteredArtists []Artist
+	for _, artist := range Artists {
+		if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) ||
+			strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(query)) ||
+			containsMember(artist.Members, query) || strings.Contains(strconv.Itoa(artist.CreationDate), strings.ToLower(query)){
+				if !checkFilteredArtists(filteredArtists, artist) {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			
+		}
+		var finalLocs []string 
+		locationDates := relations.Index[(artist.ID)-1].DatesLocations
+		for loc := range locationDates {
+			city := strings.Split(loc, "-")[0]
+			country := strings.Split(loc, "-")[1]
+			cityformatted := strings.Replace(city, "_", "", -1)
+			countryformatted := strings.Replace(country, "_", "", -1)
+			finalLocs = append(finalLocs, countryformatted)
+			finalLocs = append(finalLocs, cityformatted)
+		}
+		
+		for i := 0; i < len(finalLocs); i++{
+			if strings.Contains(strings.ToLower(finalLocs[i]), strings.ToLower(query)){
+				if !checkFilteredArtists(filteredArtists, artist) {
+					filteredArtists = append(filteredArtists, artist)
+				}
+			}
+		}
+	}
+
+	
+	tmpl := template.Must(template.ParseFiles("assets/templates/index.html"))
+	if err := tmpl.Execute(w, filteredArtists); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 
 func indexRouter(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)

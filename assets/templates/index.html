@@ -7,6 +7,10 @@
 
 <body>
     <h1 class="page-title">Groupie Tracker</h1>
+    <form action="/search" method="get">
+        <input type="text" name="q" placeholder="Search by name, album, or member...">
+        <input type="submit" value="Search">
+    </form>
     <div id="filters">
         <form action="/" method="post">
             <label for="InputRange">Creation Date from: </label>

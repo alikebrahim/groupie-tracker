@@ -15,6 +15,10 @@
     <br>{{.}}
     {{end}}
     <br>
+    Creation Date: {{.CreationDate}}
+    <br>
+    First Album: {{.FirstAlbum}} 
+    <br>
     {{ range $location, $dates := .DatesLocations}}
     <br>{{ FormatText $location}}
     <br>{{range $date := $dates}}
