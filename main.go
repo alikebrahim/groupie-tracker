@@ -238,6 +238,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	wg.Wait()
 
+
+
 	// FilterParamsCheck find the min and max values for each filter value
 	// FilterParamsCheck(Artists)
 

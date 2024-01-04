@@ -10,7 +10,9 @@ type Artist struct {
 	Locations    string   `json:"locations"`
 	ConcertDates string   `json:"concertDates"`
 	Relations    string   `json:"relations"`
+	// DatesLocations map[string][]string `json:"datesLocations"`
 }
+
 
 type ArtistRender struct {
 	ID             int                 `json:"id"`

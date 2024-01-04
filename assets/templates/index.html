@@ -8,7 +8,14 @@
 <body>
     <h1 class="page-title">Groupie Tracker</h1>
     <form action="/search" method="get">
-        <input type="text" name="q" placeholder="Search by name, album, or member...">
+        <input list="browsers" name="q" required="true"  placeholder="Search by name, album, or member...">
+        <datalist id="browsers">
+            {{range .}}<option value="{{.Name}}">Artist: {{.Name}}</option>
+            <option>Creation Date - {{.Name}}: {{.CreationDate}}</option>
+            {{range .Members}}<option value="{{.}}">Member: {{.}}</option>{{end}}
+            <option>First Album - {{.Name}}: {{.FirstAlbum}}</option>
+            {{end}}
+        </datalist>
         <input type="submit" value="Search">
     </form>
     <div id="filters">
