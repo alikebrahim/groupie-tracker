@@ -3,57 +3,74 @@
 
 <head>
     <link href="static/css/style.css" rel="stylesheet">
+
 </head>
 
 <body>
-    <h1 class="page-title">Groupie Tracker</h1>
-    <form action="/search" method="get">
-        <input list="browsers" name="q" required="true"  placeholder="Search by name, album, or member...">
-        <datalist id="browsers">
-            {{range .}}<option value="{{.Name}}">Artist: {{.Name}}</option>
-            <option>Creation Date - {{.Name}}: {{.CreationDate}}</option>
-            {{range .Members}}<option value="{{.}}">Member: {{.}}</option>{{end}}
-            <option>First Album - {{.Name}}: {{.FirstAlbum}}</option>
-            {{end}}
-        </datalist>
-        <input type="submit" value="Search">
-    </form>
-    <div id="filters">
-        <form action="/" method="post">
-            <label for="InputRange">Creation Date from: </label>
-            <input type="range" min="1957" max="2015" value=1957 oninput="this.nextElementSibling.value=this.value"
-                name="yearRangeFrom">
-            <output>1957</output>
-            <label for="InputRange">Creation Date to: </label>
-            <input type="range" min="1957" max="2015" value=2015 oninput="this.nextElementSibling.value=this.value"
-                name="yearRangeTo">
-            <output>1957</output>
-            <label for="InputRange">First Album Date from: </label>
-            <input type="range" min="1962" max="2018" value=1957 oninput="this.nextElementSibling.value=this.value"
-                name="firstAlbumFrom">
-            <output>1962</output>
-            <label for="InputRange">First Album Date to: </label>
-            <input type="range" min="1962" max="2018" value=2018 oninput="this.nextElementSibling.value=this.value"
-                name="firstAlbumTo">
-            <output>1962</output>
-            <!-- <label for="ConcertDate">Concert Date from:</label> -->
-            <!-- <input type="date" name="concertDateFrom"> -->
-            <!-- <label for="ConcertDate">Concert Date to:</label> -->
-            <!-- <input type="date" name="concertDateTo"> -->
-            <label for="Location">Location</label>
-            <input type="text" name="location" value="">
-            <label for="MembersNum">Num. of Members: </label>
-            <input type="checkbox" name="membersNum[]" value="1"> 1
-            <input type="checkbox" name="membersNum[]" value="2"> 2
-            <input type="checkbox" name="membersNum[]" value="3"> 3
-            <input type="checkbox" name="membersNum[]" value="4"> 4
-            <input type="checkbox" name="membersNum[]" value="5"> 5
-            <input type="checkbox" name="membersNum[]" value="6"> 6
-            <input type="checkbox" name="membersNum[]" value="7"> 7
-            <input type="checkbox" name="membersNum[]" value="8"> 8
-            <input type="submit" name="submit" value="Filter">
+    <div id="top-nav" class="flex">
+        <div id="filters" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <form action="/" method="post">
+                <label for="InputRange">Creation Date from: </label>
+                <input type="range" min="1957" max="2015" value=1957 oninput="this.nextElementSibling.value=this.value"
+                    name="yearRangeFrom">
+                <output>1957</output>
+                <br>
+                <label for="InputRange">Creation Date to: </label>
+                <input type="range" min="1957" max="2015" value=2015 oninput="this.nextElementSibling.value=this.value"
+                    name="yearRangeTo">
+                <output>1957</output>
+                <br>
+                <label for="InputRange">First Album Date from: </label>
+                <input type="range" min="1962" max="2018" value=1957 oninput="this.nextElementSibling.value=this.value"
+                    name="firstAlbumFrom">
+                <output>1962</output>
+                <br>
+                <label for="InputRange">First Album Date to: </label>
+                <input type="range" min="1962" max="2018" value=2018 oninput="this.nextElementSibling.value=this.value"
+                    name="firstAlbumTo">
+                <output>1962</output>
+                <br>
+              
+                <label for="Location">Location</label>
+                <input type="text" name="location" value="">
+                <label for="MembersNum">Number of Members: </label>
+                <br>
+                <input type="checkbox" name="membersNum[]" value="1"> 1
+                <input type="checkbox" name="membersNum[]" value="2"> 2
+                <input type="checkbox" name="membersNum[]" value="3"> 3
+                <input type="checkbox" name="membersNum[]" value="4"> 4
+                <input type="checkbox" name="membersNum[]" value="5"> 5
+                <input type="checkbox" name="membersNum[]" value="6"> 6
+                <input type="checkbox" name="membersNum[]" value="7"> 7
+                <input type="checkbox" name="membersNum[]" value="8"> 8
+                <input type="submit" name="submit" value="Filter">
+            </form>
+          </div>
+          <span style="font-size:px;cursor:pointer" onclick="openNav()">&#9776; Filter</span>
+          <div id="search-bar">
+            <form action="/search" method="get">
+                <input list="browsers" name="q" required="true"  placeholder="Search by name, album, or member...">
+                <datalist id="browsers">
+                    {{range .}}
+                    <option value="{{.Name}}">Artist: {{.Name}}</option>
+                    <option>Creation Date - {{.Name}}: {{.CreationDate}}</option>
+                    {{range .Members}}<option value="{{.}}">Member: {{.}}</option>{{end}}
+                    <option>First Album - {{.Name}}: {{.FirstAlbum}}</option>
+                    {{ range $location, $dates := .DatesLocations}}
+                    <option value="{{.}}">Location: {{$location}} </option>{{end}}
+
+                    {{end}}
+                </datalist>
+                <input type="submit" value="Search">
+          </div>
         </form>
+        <h1 class="page-title">Groupie Tracker</h1>
+
     </div>
+
+   
+   
     <div id="artist-grid">
         {{range .}}
         <div class="artist-card">
@@ -66,6 +83,16 @@
         </div>
         {{end}}
     </div>
+
+    <script>
+        function openNav() {
+          document.getElementById("filters").style.width = "250px";
+        }
+        
+        function closeNav() {
+          document.getElementById("filters").style.width = "0";
+        }
+        </script>
 </body>
 
 </html>

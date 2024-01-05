@@ -218,7 +218,7 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles("assets/templates/filter.html"))
+	tmpl := template.Must(template.ParseFiles("assets/templates/index.html"))
 	if err := tmpl.Execute(w, filteredArtists); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -237,14 +237,17 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	go relationsAPI(w, wg)
 
 	wg.Wait()
-
-
+	var fetchedData []ArtistRender
+	for i := 0; i < len(Artists); i++{
+		artist := MakeArtistRender(i)
+		fetchedData = append(fetchedData, artist)
+	}
 
 	// FilterParamsCheck find the min and max values for each filter value
 	// FilterParamsCheck(Artists)
 
 	tmpl := template.Must(template.ParseFiles("assets/templates/index.html"))
-	if err := tmpl.Execute(w, Artists); err != nil {
+	if err := tmpl.Execute(w, fetchedData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Println(time.Since(start))
