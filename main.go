@@ -7,10 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"strconv"
 )
 
 // *************************************************************************//
@@ -36,7 +36,6 @@ func main() {
 	http.ListenAndServe(":3000", nil)
 }
 
-
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
@@ -47,13 +46,13 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	for _, artist := range Artists {
 		if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(query)) ||
 			strings.Contains(strings.ToLower(artist.FirstAlbum), strings.ToLower(query)) ||
-			containsMember(artist.Members, query) || strings.Contains(strconv.Itoa(artist.CreationDate), strings.ToLower(query)){
-				if !checkFilteredArtists(filteredArtists, artist) {
-					filteredArtists = append(filteredArtists, artist)
-				}
-			
+			containsMember(artist.Members, query) || strings.Contains(strconv.Itoa(artist.CreationDate), strings.ToLower(query)) {
+			if !checkFilteredArtists(filteredArtists, artist) {
+				filteredArtists = append(filteredArtists, artist)
+			}
+
 		}
-		var finalLocs []string 
+		var finalLocs []string
 		locationDates := relations.Index[(artist.ID)-1].DatesLocations
 		for loc := range locationDates {
 			city := strings.Split(loc, "-")[0]
@@ -63,9 +62,9 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 			finalLocs = append(finalLocs, countryformatted)
 			finalLocs = append(finalLocs, cityformatted)
 		}
-		
-		for i := 0; i < len(finalLocs); i++{
-			if strings.Contains(strings.ToLower(finalLocs[i]), strings.ToLower(query)){
+
+		for i := 0; i < len(finalLocs); i++ {
+			if strings.Contains(strings.ToLower(finalLocs[i]), strings.ToLower(query)) {
 				if !checkFilteredArtists(filteredArtists, artist) {
 					filteredArtists = append(filteredArtists, artist)
 				}
@@ -73,13 +72,11 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	
 	tmpl := template.Must(template.ParseFiles("assets/templates/index.html"))
 	if err := tmpl.Execute(w, filteredArtists); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
 
 func indexRouter(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
@@ -237,17 +234,17 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	go relationsAPI(w, wg)
 
 	wg.Wait()
-	var fetchedData []ArtistRender
-	for i := 0; i < len(Artists); i++{
+	var artists []ArtistRender
+	for i := 0; i < len(Artists); i++ {
 		artist := MakeArtistRender(i)
-		fetchedData = append(fetchedData, artist)
+		artists = append(artists, artist)
 	}
 
 	// FilterParamsCheck find the min and max values for each filter value
 	// FilterParamsCheck(Artists)
 
 	tmpl := template.Must(template.ParseFiles("assets/templates/index.html"))
-	if err := tmpl.Execute(w, fetchedData); err != nil {
+	if err := tmpl.Execute(w, artists); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Println(time.Since(start))
@@ -255,23 +252,14 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func artistHandler(w http.ResponseWriter, r *http.Request) {
 	id := GetID(r.URL.Query().Get("id")) - 1
-	artist := ArtistRender{
-		ID:             Artists[id].ID,
-		Image:          Artists[id].Image,
-		Name:           Artists[id].Name,
-		Members:        Artists[id].Members,
-		CreationDate:   Artists[id].CreationDate,
-		FirstAlbum:     Artists[id].FirstAlbum,
-		DatesLocations: relations.Index[id].DatesLocations,
-	}
+
+	artist := MakeArtistRender(id)
 
 	artist.MapDetails.Locations = Geocoding(artist)
 
 	artist.MapDetails.MapURL = CreatMap(artist)
 
-	tmpl := template.Must(template.New("artist.html").Funcs(template.FuncMap{
-		"FormatText": FormatText,
-	}).ParseFiles("assets/templates/artist.html"))
+	tmpl := template.Must(template.ParseFiles("assets/templates/artist.html"))
 	if err := tmpl.Execute(w, artist); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -334,10 +322,9 @@ func CreatMap(artist ArtistRender) string {
 
 		// mapCenter string = "41.0082,28.9784"
 		// zoom    string = "2"
-		size    string = "500x400"
-		markers string
+		size string = "500x400"
+		// markers string
 	)
-	fmt.Println("Markers:\n", markers)
 
 	params := url.Values{}
 	// params.Add("center", mapCenter)

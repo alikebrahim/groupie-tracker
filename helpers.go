@@ -18,13 +18,14 @@ func GetID(id string) int {
 
 func MakeArtistRender(i int) ArtistRender {
 	return ArtistRender{
-		ID:             Artists[i].ID,
-		Image:          Artists[i].Image,
-		Name:           Artists[i].Name,
-		Members:        Artists[i].Members,
-		CreationDate:   Artists[i].CreationDate,
-		FirstAlbum:     Artists[i].FirstAlbum,
-		DatesLocations: relations.Index[i].DatesLocations,
+		ID:               Artists[i].ID,
+		Image:            Artists[i].Image,
+		Name:             Artists[i].Name,
+		Members:          Artists[i].Members,
+		CreationDate:     Artists[i].CreationDate,
+		FirstAlbum:       Artists[i].FirstAlbum,
+		DatesLocations:   relations.Index[i].DatesLocations,
+		DatesLocations_F: formatLocations(relations.Index[i].DatesLocations),
 	}
 }
 
@@ -80,14 +81,20 @@ func GetInfoFiltered(id int, loc string, a ArtistRender) (int, bool) {
 	return firstAlbumYear, locationExist
 }
 
-func FormatText(input string) string {
-	input = strings.ToTitle(input)
+func formatLocations(dl map[string][]string) map[string][]string {
+	newDL := make(map[string][]string)
 
-	input = strings.ReplaceAll(input, "_", " ")
+	for k, v := range dl {
+		input := strings.ToTitle(k)
 
-	input = strings.ReplaceAll(input, "-", ", ")
+		input = strings.ReplaceAll(input, "_", " ")
 
-	return input
+		input = strings.ReplaceAll(input, "-", ", ")
+
+		newDL[input] = v
+	}
+
+	return newDL
 }
 
 func FormParse(r *http.Request) (int, int, int, int, string, []int) {
@@ -187,11 +194,11 @@ func checkFilteredArtists(arr []Artist, artist Artist) bool {
 		return false
 	}
 	id := artist.ID
-	for i := 0; i < len(arr); i++{
+	for i := 0; i < len(arr); i++ {
 		if arr[i].ID == id {
 			return true
 		}
-	
+
 	}
 	return false
 

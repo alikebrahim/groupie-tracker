@@ -17,16 +17,16 @@
     <br>
     Creation Date: {{.CreationDate}}
     <br>
-    First Album: {{.FirstAlbum}} 
+    First Album: {{.FirstAlbum}}
     <br>
-    {{ range $location, $dates := .DatesLocations}}
-    <br>{{ FormatText $location}}
-    <br>{{range $date := $dates}}
+    {{ range $location, $dates := .DatesLocations_F}}
+    <br>{{ $location }}
+    <br>{{ range $date := $dates }}
     <br>{{ $date }}
     {{end}}
     <br>
     {{end}}
-    <img src="{{.MapDetails.MapURL }}" alt="map">
+    <img src="{{ .MapDetails.MapURL }}" alt="map">
 </body>
 
 </html>

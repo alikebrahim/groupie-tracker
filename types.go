@@ -13,16 +13,16 @@ type Artist struct {
 	// DatesLocations map[string][]string `json:"datesLocations"`
 }
 
-
 type ArtistRender struct {
-	ID             int                 `json:"id"`
-	Image          string              `json:"image"`
-	Name           string              `json:"name"`
-	Members        []string            `json:"members"`
-	CreationDate   int                 `json:"creationDate"`
-	FirstAlbum     string              `json:"firstAlbum"`
-	DatesLocations map[string][]string `json:"datesLocations"`
-	MapDetails     MapLocations        `json:"map_details"`
+	ID               int                 `json:"id"`
+	Image            string              `json:"image"`
+	Name             string              `json:"name"`
+	Members          []string            `json:"members"`
+	CreationDate     int                 `json:"creationDate"`
+	FirstAlbum       string              `json:"firstAlbum"`
+	DatesLocations   map[string][]string `json:"datesLocations"`
+	DatesLocations_F map[string][]string `json:"datesLocations_f"`
+	MapDetails       MapLocations        `json:"map_details"`
 }
 
 type MapLocations struct {
