@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -30,12 +33,12 @@ func MakeArtistRender(i int) ArtistRender {
 }
 
 // GetInfo returns the formatted first album year && a bool if location exists in the artist's locations
-func GetInfo(id int, loc string, a Artist) (int, bool) {
+func GetInfo(id int, loc string, a Artist) (int, bool, error) {
 	var locationExist bool
 	var locationsList []string
 	dateParsed, err := time.Parse("02-01-2006", a.FirstAlbum)
 	if err != nil {
-		fmt.Println(err) // server side error #500
+		return 0, false, err
 	}
 	firstAlbumYear := dateParsed.Year()
 
@@ -52,16 +55,15 @@ func GetInfo(id int, loc string, a Artist) (int, bool) {
 			break
 		}
 	}
-	return firstAlbumYear, locationExist
+	return firstAlbumYear, locationExist, nil
 }
 
-func GetInfoFiltered(id int, loc string, a ArtistRender) (int, bool) {
-	fmt.Println("Start for: ", a.Name)
+func GetInfoFiltered(id int, loc string, a ArtistRender) (int, bool, error) {
 	var locationExist bool
 	var locationsList []string
 	dateParsed, err := time.Parse("02-01-2006", a.FirstAlbum)
 	if err != nil {
-		fmt.Println(err) // server side error #500
+		return 0, false, err
 	}
 	firstAlbumYear := dateParsed.Year()
 
@@ -77,8 +79,7 @@ func GetInfoFiltered(id int, loc string, a ArtistRender) (int, bool) {
 			break
 		}
 	}
-	fmt.Println("End for: ", a.Name)
-	return firstAlbumYear, locationExist
+	return firstAlbumYear, locationExist, nil
 }
 
 func formatLocations(dl map[string][]string) map[string][]string {
@@ -97,29 +98,29 @@ func formatLocations(dl map[string][]string) map[string][]string {
 	return newDL
 }
 
-func FormParse(r *http.Request) (int, int, int, int, string, []int) {
+func FormParse(r *http.Request) (int, int, int, int, string, []int, error) {
 	creationDateFrom := r.PostFormValue("yearRangeFrom")
 	creationYearFrom, err := strconv.Atoi(creationDateFrom)
 	if err != nil {
-		fmt.Println(err) // server side error #500
+		return 0, 0, 0, 0, "", []int{}, err
 	}
 
 	creationDateTo := r.PostFormValue("yearRangeTo")
 	creationYearTo, err := strconv.Atoi(creationDateTo)
 	if err != nil {
-		fmt.Println(err) // server side error #500
+		return 0, 0, 0, 0, "", []int{}, err
 	}
 
 	firstAlbumDateFrom := r.PostFormValue("firstAlbumFrom")
 	firstAlbumYearFrom, err := strconv.Atoi(firstAlbumDateFrom)
 	if err != nil {
-		fmt.Println(err) // server side error #500
+		return 0, 0, 0, 0, "", []int{}, err
 	}
 
 	firstAlbumDateTo := r.PostFormValue("firstAlbumTo")
 	firstAlbumYearTo, err := strconv.Atoi(firstAlbumDateTo)
 	if err != nil {
-		fmt.Println(err) // server side error #500
+		return 0, 0, 0, 0, "", []int{}, err
 	}
 
 	location := r.PostFormValue("location")
@@ -131,53 +132,13 @@ func FormParse(r *http.Request) (int, int, int, int, string, []int) {
 
 		int, err := strconv.Atoi(str)
 		if err != nil {
-			fmt.Println(err) // server side error #500
+			fmt.Println(err)
 			continue
 		}
 		memmbersNum = append(memmbersNum, int)
 	}
 
-	return creationYearFrom, creationYearTo, firstAlbumYearFrom, firstAlbumYearTo, location, memmbersNum
-}
-
-// below code was used to find the values of highest number of members of a group, earliest album and creation dates
-// and latest album and creation dates
-func FilterParamsCheck(Artists []Artist) {
-	var (
-		maxMem, earliestAlbum, latestAlbum, earliestCreation, latestCreation int
-	)
-	for indx, artist := range Artists {
-		albumYearParsed, err := time.Parse("02-01-2006", artist.FirstAlbum)
-		if err != nil {
-			fmt.Println(err) // server side error #500
-		}
-		firstAlbumYear := albumYearParsed.Year()
-		if err != nil {
-			fmt.Println(err) // server side error #500
-		}
-		if indx == 0 {
-			earliestAlbum = firstAlbumYear
-			earliestCreation = artist.CreationDate
-		}
-		if len(artist.Members) > maxMem {
-			maxMem = len(artist.Members)
-		}
-		if artist.CreationDate < earliestCreation {
-			earliestCreation = artist.CreationDate
-		}
-		if artist.CreationDate > latestCreation {
-			latestCreation = artist.CreationDate
-		}
-		if firstAlbumYear < earliestAlbum {
-			earliestAlbum = firstAlbumYear
-		}
-		if firstAlbumYear > latestAlbum {
-			latestAlbum = firstAlbumYear
-		}
-
-	}
-	fmt.Printf("max members: %d <<>> earliest album year: %d <<>> latest album year: %d <<>> earliest creation date: %d <<>> latest creation date: %d \n", maxMem, earliestAlbum, latestAlbum, earliestCreation, latestCreation)
-
+	return creationYearFrom, creationYearTo, firstAlbumYearFrom, firstAlbumYearTo, location, memmbersNum, nil
 }
 
 func containsMember(members []string, query string) bool {
@@ -202,4 +163,77 @@ func checkFilteredArtists(arr []Artist, artist Artist) bool {
 	}
 	return false
 
+}
+
+func Geocoding(artist ArtistRender) ([]GeoLocation, error) {
+	var (
+		GeoLocations []GeoLocation
+		APIKey       = "AIzaSyD0AeIdWqfSMZujmXzaOHAQx1deLoYFnFE"
+		baseURL      = "https://maps.googleapis.com/maps/api/geocode/json?"
+	)
+
+	for loc := range artist.DatesLocations {
+		var (
+			respData        GeocodingResponse
+			locationAddress GeoLocation
+			address         = strings.ReplaceAll(loc, "-", ",")
+		)
+
+		params := url.Values{}
+		params.Add("address", address)
+		params.Add("key", APIKey)
+
+		resp, err := http.Get(baseURL + params.Encode())
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(body, &respData)
+		if err != nil {
+			return nil, err
+		}
+
+		locationAddress.Location = respData.Results[0].FormattedAddress
+		locationAddress.Lat, locationAddress.Lng = respData.Results[0].Geometry.Location.Lat, respData.Results[0].Geometry.Location.Lng
+
+		GeoLocations = append(GeoLocations, locationAddress)
+	}
+
+	return GeoLocations, nil
+}
+
+func CreatMap(artist ArtistRender) string {
+	var (
+		baseURL string = "https://maps.googleapis.com/maps/api/staticmap?"
+		APIKey  string = "AIzaSyD0AeIdWqfSMZujmXzaOHAQx1deLoYFnFE"
+
+		size string = "500x400"
+	)
+
+	params := url.Values{}
+	params.Add("size", size)
+	for _, loc := range artist.MapDetails.Locations {
+		marker := fmt.Sprintf("%v,%v", loc.Lat, loc.Lng)
+		params.Add("markers", marker)
+	}
+	params.Add("key", APIKey)
+
+	return baseURL + params.Encode()
+}
+
+func RenderPage(w http.ResponseWriter, status int, page string, data any) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	err := Tmpl.ExecuteTemplate(w, page, data)
+	if err != nil {
+		if page != "404.html" {
+			RenderPage(w, http.StatusNotFound, "404.html", data)
+		}
+	}
 }

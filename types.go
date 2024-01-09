@@ -1,5 +1,9 @@
 package main
 
+import "html/template"
+
+var Tmpl *template.Template
+
 type Artist struct {
 	ID           int      `json:"id"`
 	Image        string   `json:"image"`
